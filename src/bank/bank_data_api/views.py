@@ -40,17 +40,20 @@ class BankBranchApiView(APIView):
             bank_name = None
 
         try:
-            if city is not None:
-                result_qs = Branch.objects.filter(city__icontains = city)
-
-            if bank_name is not None:
-                result_qs = Branch.objects.filter(bank__bank_name__icontains = bank_name)
 
             if ifsc_code is not None:
                 result_qs = Branch.objects.filter(ifsc__icontains = ifsc_code)
 
             if city is not None and bank_name is not None:
-                result_qs = Branch.objects.filter(Q(bank__bank_name__icontains= bank_name)| Q(city__icontains=city))
+
+                result_qs = Branch.objects.filter(bank__bank_name__icontains= bank_name,city__icontains=city)
+
+            else:
+                if city is not None:
+                    result_qs = Branch.objects.filter(city__icontains=city)
+
+                if bank_name is not None:
+                    result_qs = Branch.objects.filter(bank__bank_name__icontains=bank_name)
 
             serializer = BankBranchSerilizer(result_qs, many=True)
 
