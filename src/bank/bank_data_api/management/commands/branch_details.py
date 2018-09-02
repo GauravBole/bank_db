@@ -4,7 +4,7 @@ import csv
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('bank_data_api/csv_files/bank_branches.csv') as csvfile:
+        with open('bank_data_api/csv_files/bank_branches.csv', encoding="utf-8") as csvfile:
             readCSV = csv.reader(csvfile, delimiter=',')
             # remove First Line(header)
             next(csvfile)

@@ -23,9 +23,41 @@ class ListBanks(APIView):
 class BankBranchApiView(APIView):
     def get(self, request, format=None):
 
-        branches = Branch.objects.all()
-        serializer = BankBranchSerilizer(branches, many=True)
-        return Response(serializer.data)
+        result_qs = Branch.objects.all()
+        serializer = BankBranchSerilizer(result_qs, many=True)
+        try:
+            ifsc_code = request.GET.get('ifsc_code')
+        except:
+            ifsc_code = None
+
+        try:
+            city = request.GET.get('city')
+        except:
+            city = None
+        try:
+            bank_name = request.GET.get('bank')
+        except:
+            bank_name = None
+
+        try:
+            if city is not None:
+                result_qs = Branch.objects.filter(city__icontains = city)
+
+            if bank_name is not None:
+                result_qs = Branch.objects.filter(bank__bank_name__icontains = bank_name)
+
+            if ifsc_code is not None:
+                result_qs = Branch.objects.filter(ifsc__icontains = ifsc_code)
+
+            if city is not None and bank_name is not None:
+                result_qs = Branch.objects.filter(Q(bank__bank_name__icontains= bank_name)| Q(city__icontains=city))
+
+            serializer = BankBranchSerilizer(result_qs, many=True)
+
+            return Response(serializer.data)
+        except:
+            return Response({'result': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
+
 
     def post(self,requset, format=None):
         try:
@@ -52,7 +84,9 @@ class BankBranchApiView(APIView):
         except:
             return Response({'result': 'Missing fields'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    def get_queryset(self):
+        longitude = self.request.query_params.get('ifsc_code')
+        print(">>>>>>>>>>>>>>>",longitude)
 
 # class BankBranchApiView(ListAPIView):
 #     queryset = Branch.objects.all()
